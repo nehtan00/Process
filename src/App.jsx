@@ -1,35 +1,39 @@
 import React, { useState } from "react";
 import WorksheetStepper from "./components/WorksheetStepper";
-import FeelingsWheelModal from "./components/FeelingsWheelModal";
+import FeelingsWheel from "./components/FeelingsWheel";
 
 function App() {
-  const [showWheel, setShowWheel] = useState(false);
+  const [selectedEmotion, setSelectedEmotion] = useState("");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-100 text-gray-900">
-      <header className="p-6 flex justify-between items-center bg-white shadow-md">
-        <h1 className="text-2xl font-bold">Emotional Processing Worksheets</h1>
-        <button
-          className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition"
-          onClick={() => setShowWheel(true)}
-        >
-          Open Feelings Wheel
-        </button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 text-gray-900">
+      <header className="p-6 flex flex-col sm:flex-row justify-between items-center bg-white/80 backdrop-blur-sm shadow-lg border-b border-gray-200">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          Emotional Processing Worksheets
+        </h1>
+        {selectedEmotion && (
+          <div className="mt-2 sm:mt-0 text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+            💭 Selected: <span className="font-semibold text-blue-700">{selectedEmotion}</span>
+          </div>
+        )}
       </header>
-      <main className="max-w-2xl mx-auto py-10 px-4">
-        <WorksheetStepper />
-      </main>
-      <FeelingsWheelModal open={showWheel} onClose={() => setShowWheel(false)} />
-      {/* Floating button for mobile */}
-      <button
-        className="fixed bottom-6 right-6 bg-purple-600 text-white p-4 rounded-full shadow-lg md:hidden z-50 hover:bg-purple-700 transition"
-        onClick={() => setShowWheel(true)}
-        aria-label="Open Feelings Wheel"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
-        </svg>
-      </button>
+      
+      <div className="flex flex-col xl:flex-row gap-8 p-6 max-w-7xl mx-auto">
+        {/* Feelings Wheel - Always visible */}
+        <div className="xl:w-1/3 flex justify-center">
+          <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20">
+            <FeelingsWheel 
+              selectedEmotion={selectedEmotion}
+              onSelectEmotion={setSelectedEmotion}
+            />
+          </div>
+        </div>
+        
+        {/* Worksheets */}
+        <div className="xl:w-2/3">
+          <WorksheetStepper selectedEmotion={selectedEmotion} />
+        </div>
+      </div>
     </div>
   );
 }

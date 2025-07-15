@@ -23,7 +23,7 @@ const steps = [
   },
 ];
 
-export default function WorksheetStepper() {
+export default function WorksheetStepper({ selectedEmotion }) {
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState({
     feelingWheel: {},
@@ -71,49 +71,71 @@ export default function WorksheetStepper() {
   const stepKey = steps[current].key;
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
-      <div className="flex items-center mb-6">
+    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8">
+      <div className="flex items-center mb-8">
         {steps.map((step, idx) => (
           <div key={step.label} className="flex items-center">
             <div
-              className={`w-8 h-8 flex items-center justify-center rounded-full font-bold text-white ${
-                idx === current ? "bg-purple-600" : "bg-gray-300"
+              className={`w-10 h-10 flex items-center justify-center rounded-full font-bold text-white transition-all duration-300 ${
+                idx === current ? "bg-gradient-to-r from-purple-600 to-blue-600 shadow-lg" : "bg-gray-300"
               }`}
             >
               {idx + 1}
             </div>
             {idx < steps.length - 1 && (
-              <div className="w-8 h-1 bg-gray-300 mx-2" />
+              <div className={`w-12 h-1 mx-3 transition-all duration-300 ${
+                idx < current ? "bg-gradient-to-r from-purple-600 to-blue-600" : "bg-gray-300"
+              }`} />
             )}
           </div>
         ))}
       </div>
+      
+      <div className="mb-6">
+        <h2 className="text-xl font-bold text-gray-800 mb-2">{steps[current].label}</h2>
+        <div className="w-16 h-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full"></div>
+      </div>
+      
       <StepComponent
         value={answers[stepKey]}
         onChange={(val) => handleStepChange(stepKey, val)}
+        selectedEmotion={selectedEmotion}
       />
+      
       <div className="flex justify-between mt-8">
         <button
-          className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+          className="px-6 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={() => setCurrent((c) => Math.max(0, c - 1))}
           disabled={current === 0}
         >
-          Back
+          ← Back
         </button>
         <button
-          className="px-4 py-2 rounded bg-purple-600 text-white hover:bg-purple-700"
+          className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium hover:from-purple-700 hover:to-blue-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
           onClick={() => setCurrent((c) => Math.min(steps.length - 1, c + 1))}
           disabled={current === steps.length - 1}
         >
-          Next
+          Next →
         </button>
       </div>
-      <div className="flex gap-2 mt-8 justify-end">
-        <button className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700" onClick={handleSave}>Save</button>
-        <button className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700" onClick={handleDownload}>Download</button>
-        <button className="px-4 py-2 rounded bg-gray-600 text-white hover:bg-gray-700" onClick={handleCopy}>Copy</button>
+      
+      <div className="flex gap-3 mt-8 justify-end">
+        <button className="px-4 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 transition-all duration-300 shadow-md" onClick={handleSave}>
+          💾 Save
+        </button>
+        <button className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-all duration-300 shadow-md" onClick={handleDownload}>
+          📥 Download
+        </button>
+        <button className="px-4 py-2 rounded-lg bg-gray-500 text-white hover:bg-gray-600 transition-all duration-300 shadow-md" onClick={handleCopy}>
+          📋 Copy
+        </button>
       </div>
-      {status && <div className="mt-2 text-center text-sm text-purple-700">{status}</div>}
+      
+      {status && (
+        <div className="mt-4 text-center text-sm font-medium text-purple-700 bg-purple-50 px-4 py-2 rounded-lg border border-purple-200">
+          {status}
+        </div>
+      )}
     </div>
   );
 } 
