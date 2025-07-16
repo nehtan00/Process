@@ -1,12 +1,33 @@
-# React + Vite
+# Emotional Processing Website
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An interactive emotional processing tool featuring a dynamic feelings wheel and therapeutic worksheets.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Interactive Feelings Wheel**: 3-ring structure with core, middle, and outer emotions
+- **Dynamic Expansion**: Hover over any ring to expand and see all emotions clearly
+- **Therapeutic Worksheets**: Three different worksheets for emotional processing
+- **Firebase Integration**: Save, download, and copy worksheet responses
+- **Modern UI**: Clean, responsive design with smooth animations
 
-## Expanding the ESLint configuration
+## Live Site
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Visit the live site: [https://nehtan00.github.io/Process/](https://nehtan00.github.io/Process/)
+
+## Technology Stack
+
+- React + Vite
+- Tailwind CSS
+- Firebase (Firestore)
+- GitHub Pages
+
+## Development
+
+```bash
+npm install
+npm run dev
+```
+
+## Deployment
+
+Automatically deployed to GitHub Pages via GitHub Actions.
