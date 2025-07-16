@@ -1,118 +1,116 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 
-// Wheel data structure: core, middle, outer
+// Proper Plutchik Wheel of Emotions structure
 const wheelData = [
   {
-    core: "Happy",
+    core: "Joy",
     color: "#FBBF24",
     middle: [
       {
-        label: "Playful",
-        outer: ["Cheeky", "Free", "Joyful", "Energetic", "Aroused", "Excited"],
+        label: "Serenity",
+        outer: ["Content", "Peaceful", "Relaxed", "Calm", "Tranquil"]
       },
       {
-        label: "Content",
-        outer: ["Interested", "Proud", "Accepted", "Powerful", "Peaceful", "Trusting"],
-      },
-      {
-        label: "Optimistic",
-        outer: ["Thankful", "Sensitive", "Intimate", "Hopeful", "Inspired"],
-      },
-    ],
-  },
-  {
-    core: "Sad",
-    color: "#6366F1",
-    middle: [
-      {
-        label: "Lonely",
-        outer: ["Isolated", "Abandoned", "Victimized", "Fragile", "Grief", "Powerless", "Empty", "Remorseful"]
-      },
-      {
-        label: "Vulnerable",
-        outer: ["Guilty", "Ashamed", "Inferior", "Embarrassed", "Disappointed", "Appalled", "Repelled"]
-      },
-      {
-        label: "Despair",
-        outer: ["Depressed", "Hurt"]
+        label: "Ecstasy",
+        outer: ["Elated", "Euphoric", "Thrilled", "Exhilarated", "Overjoyed"]
       }
     ],
   },
   {
-    core: "Angry",
-    color: "#EF4444",
-    middle: [
-      {
-        label: "Let Down",
-        outer: ["Betrayed", "Resentful", "Disrespected", "Ridiculed", "Indignant", "Violated"]
-      },
-      {
-        label: "Mad",
-        outer: ["Furious", "Jealous", "Provoked", "Hostile", "Infuriated", "Annoyed", "Withdrawn", "Numb"]
-      },
-      {
-        label: "Aggressive",
-        outer: ["Frustrated", "Distant", "Critical"]
-      }
-    ],
-  },
-  {
-    core: "Fearful",
-    color: "#A21CAF",
-    middle: [
-      {
-        label: "Scared",
-        outer: ["Anxious", "Insecure", "Weak", "Rejected", "Threatened"]
-      },
-      {
-        label: "Helpless",
-        outer: ["Frightened", "Overwhelmed", "Worried", "Inadequate", "Inferior", "Insignificant"]
-      },
-      {
-        label: "Excluded",
-        outer: ["Persecuted", "Nervous", "Exposed"]
-      }
-    ],
-  },
-  {
-    core: "Disgusted",
-    color: "#92400E",
-    middle: [
-      {
-        label: "Disapproving",
-        outer: ["Disappointed", "Appalled", "Repelled"]
-      },
-      {
-        label: "Disapproving",
-        outer: ["Disgusted", "Disapproving"]
-      }
-    ],
-  },
-  {
-    core: "Bad",
-    color: "#8B5CF6",
-    middle: [
-      {
-        label: "Bored",
-        outer: ["Busy", "Stressed", "Tired"]
-      },
-      {
-        label: "Indifferent",
-        outer: ["Apathetic", "Uninterested"]
-      }
-    ],
-  },
-  {
-    core: "Surprised",
+    core: "Trust",
     color: "#10B981",
     middle: [
       {
-        label: "Startled",
-        outer: ["Shocked", "Disillusioned", "Perplexed", "Astonished", "Awe"]
+        label: "Acceptance",
+        outer: ["Welcoming", "Open", "Receptive", "Approving", "Understanding"]
       },
       {
-        label: "Confused",
-        outer: ["Amazed", "Excited"]
+        label: "Admiration",
+        outer: ["Respectful", "Appreciative", "Grateful", "Honored", "Valued"]
+      }
+    ],
+  },
+  {
+    core: "Fear",
+    color: "#A21CAF",
+    middle: [
+      {
+        label: "Apprehension",
+        outer: ["Uneasy", "Worried", "Concerned", "Anxious", "Nervous"]
+      },
+      {
+        label: "Terror",
+        outer: ["Panicked", "Horrified", "Petrified", "Alarmed", "Frightened"]
+      }
+    ],
+  },
+  {
+    core: "Surprise",
+    color: "#F59E0B",
+    middle: [
+      {
+        label: "Distraction",
+        outer: ["Confused", "Bewildered", "Perplexed", "Puzzled", "Mystified"]
+      },
+      {
+        label: "Amazement",
+        outer: ["Astonished", "Stunned", "Shocked", "Awed", "Wonderstruck"]
+      }
+    ],
+  },
+  {
+    core: "Sadness",
+    color: "#6366F1",
+    middle: [
+      {
+        label: "Pensiveness",
+        outer: ["Melancholy", "Reflective", "Thoughtful", "Contemplative", "Somber"]
+      },
+      {
+        label: "Grief",
+        outer: ["Devastated", "Heartbroken", "Mournful", "Despairing", "Hopeless"]
+      }
+    ],
+  },
+  {
+    core: "Disgust",
+    color: "#92400E",
+    middle: [
+      {
+        label: "Boredom",
+        outer: ["Uninterested", "Apathetic", "Indifferent", "Unmotivated", "Disengaged"]
+      },
+      {
+        label: "Loathing",
+        outer: ["Revolted", "Repulsed", "Disgusted", "Appalled", "Horrified"]
+      }
+    ],
+  },
+  {
+    core: "Anger",
+    color: "#EF4444",
+    middle: [
+      {
+        label: "Annoyance",
+        outer: ["Irritated", "Frustrated", "Exasperated", "Agitated", "Bothered"]
+      },
+      {
+        label: "Rage",
+        outer: ["Furious", "Enraged", "Livid", "Incensed", "Infuriated"]
+      }
+    ],
+  },
+  {
+    core: "Anticipation",
+    color: "#F97316",
+    middle: [
+      {
+        label: "Interest",
+        outer: ["Curious", "Engaged", "Focused", "Attentive", "Involved"]
+      },
+      {
+        label: "Vigilance",
+        outer: ["Alert", "Watchful", "Cautious", "Careful", "Mindful"]
       }
     ],
   },
@@ -134,7 +132,9 @@ const allEmotions = (() => {
 })();
 
 export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
-  const size = 400;
+  const [hoveredRing, setHoveredRing] = useState(null);
+  const [hoveredSection, setHoveredSection] = useState(null);
+  const size = 900;
   const center = size / 2;
   
   // Find which segment is selected
@@ -143,13 +143,15 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
     return allEmotions[selectedEmotion.toLowerCase()] || null;
   }, [selectedEmotion]);
 
-  // Calculate SVG paths for each ring
+  // Calculate SVG paths for each ring with expansion
   const coreSegments = useMemo(() => {
     const segmentAngle = (2 * Math.PI) / wheelData.length;
+    const isExpanded = hoveredRing === 'core';
+    const radius = isExpanded ? 120 : 80;
+    
     return wheelData.map((emotion, index) => {
       const startAngle = index * segmentAngle;
       const endAngle = (index + 1) * segmentAngle;
-      const radius = 60;
       
       const x1 = center + radius * Math.cos(startAngle);
       const y1 = center + radius * Math.sin(startAngle);
@@ -169,13 +171,21 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
         path,
         emotion: emotion.core,
         color: emotion.color,
-        index
+        index,
+        startAngle,
+        endAngle,
+        radius,
+        isExpanded
       };
     });
-  }, [center]);
+  }, [center, hoveredRing]);
 
   const middleSegments = useMemo(() => {
     const segments = [];
+    const isExpanded = hoveredRing === 'middle';
+    const innerRadius = isExpanded ? 140 : 100;
+    const outerRadius = isExpanded ? 280 : 200;
+    
     wheelData.forEach((core, coreIndex) => {
       const coreSegmentAngle = (2 * Math.PI) / wheelData.length;
       const coreStartAngle = coreIndex * coreSegmentAngle;
@@ -184,8 +194,6 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
       core.middle.forEach((middle, middleIndex) => {
         const startAngle = coreStartAngle + (middleIndex * middleSegmentAngle);
         const endAngle = coreStartAngle + ((middleIndex + 1) * middleSegmentAngle);
-        const innerRadius = 60;
-        const outerRadius = 120;
         
         const x1 = center + innerRadius * Math.cos(startAngle);
         const y1 = center + innerRadius * Math.sin(startAngle);
@@ -211,62 +219,68 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
           emotion: middle.label,
           color: core.color,
           coreIndex,
-          middleIndex
+          middleIndex,
+          startAngle,
+          endAngle,
+          innerRadius,
+          outerRadius,
+          isExpanded,
+          outerEmotions: middle.outer
         });
       });
     });
     return segments;
-  }, [center]);
+  }, [center, hoveredRing]);
 
   const outerSegments = useMemo(() => {
+    if (hoveredRing !== 'middle' || !hoveredSection) return [];
+    
     const segments = [];
-    wheelData.forEach((core, coreIndex) => {
-      const coreSegmentAngle = (2 * Math.PI) / wheelData.length;
-      const coreStartAngle = coreIndex * coreSegmentAngle;
+    const innerRadius = 300;
+    const outerRadius = 420;
+    
+    const activeMiddle = middleSegments.find(s => s.emotion === hoveredSection);
+    if (!activeMiddle) return [];
+    
+    const segmentAngle = (activeMiddle.endAngle - activeMiddle.startAngle) / activeMiddle.outerEmotions.length;
+    
+    activeMiddle.outerEmotions.forEach((outer, index) => {
+      const startAngle = activeMiddle.startAngle + (index * segmentAngle);
+      const endAngle = activeMiddle.startAngle + ((index + 1) * segmentAngle);
       
-      core.middle.forEach((middle, middleIndex) => {
-        const middleSegmentAngle = coreSegmentAngle / core.middle.length;
-        const middleStartAngle = coreStartAngle + (middleIndex * middleSegmentAngle);
-        const outerSegmentAngle = middleSegmentAngle / middle.outer.length;
-        
-        middle.outer.forEach((outer, outerIndex) => {
-          const startAngle = middleStartAngle + (outerIndex * outerSegmentAngle);
-          const endAngle = middleStartAngle + ((outerIndex + 1) * outerSegmentAngle);
-          const innerRadius = 120;
-          const outerRadius = 180;
-          
-          const x1 = center + innerRadius * Math.cos(startAngle);
-          const y1 = center + innerRadius * Math.sin(startAngle);
-          const x2 = center + innerRadius * Math.cos(endAngle);
-          const y2 = center + innerRadius * Math.sin(endAngle);
-          const x3 = center + outerRadius * Math.cos(endAngle);
-          const y3 = center + outerRadius * Math.sin(endAngle);
-          const x4 = center + outerRadius * Math.cos(startAngle);
-          const y4 = center + outerRadius * Math.sin(startAngle);
-          
-          const largeArcFlag = outerSegmentAngle > Math.PI ? 1 : 0;
-          
-          const path = [
-            `M ${x1} ${y1}`,
-            `A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
-            `L ${x3} ${y3}`,
-            `A ${outerRadius} ${outerRadius} 0 ${largeArcFlag} 0 ${x4} ${y4}`,
-            'Z'
-          ].join(' ');
-          
-          segments.push({
-            path,
-            emotion: outer,
-            color: core.color,
-            coreIndex,
-            middleIndex,
-            outerIndex
-          });
-        });
+      const x1 = center + innerRadius * Math.cos(startAngle);
+      const y1 = center + innerRadius * Math.sin(startAngle);
+      const x2 = center + innerRadius * Math.cos(endAngle);
+      const y2 = center + innerRadius * Math.sin(endAngle);
+      const x3 = center + outerRadius * Math.cos(endAngle);
+      const y3 = center + outerRadius * Math.sin(endAngle);
+      const x4 = center + outerRadius * Math.cos(startAngle);
+      const y4 = center + outerRadius * Math.sin(startAngle);
+      
+      const largeArcFlag = segmentAngle > Math.PI ? 1 : 0;
+      
+      const path = [
+        `M ${x1} ${y1}`,
+        `A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+        `L ${x3} ${y3}`,
+        `A ${outerRadius} ${outerRadius} 0 ${largeArcFlag} 0 ${x4} ${y4}`,
+        'Z'
+      ].join(' ');
+      
+      segments.push({
+        path,
+        emotion: outer,
+        color: activeMiddle.color,
+        startAngle,
+        endAngle,
+        innerRadius,
+        outerRadius,
+        index
       });
     });
+    
     return segments;
-  }, [center]);
+  }, [center, hoveredRing, hoveredSection, middleSegments]);
 
   const handleSegmentClick = (emotion) => {
     onSelectEmotion(emotion);
@@ -292,87 +306,144 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
     return false;
   };
 
+  const isHovered = (emotion) => {
+    return hoveredSection === emotion;
+  };
+
+  // Helper function to position text labels
+  const getLabelPosition = (startAngle, endAngle, radius) => {
+    const midAngle = (startAngle + endAngle) / 2;
+    const x = center + radius * Math.cos(midAngle);
+    const y = center + radius * Math.sin(midAngle);
+    return { x, y, angle: midAngle };
+  };
+
   return (
     <div className="flex flex-col items-center">
       <div className="mb-4 text-xl font-bold text-gray-800">Feelings Wheel</div>
       <div className="relative">
         <svg width={size} height={size} className="drop-shadow-xl">
-          {/* Outer ring segments */}
+          {/* Outer ring segments - only visible when hovering middle ring */}
           {outerSegments.map((segment, index) => (
-            <path
-              key={`outer-${index}`}
-              d={segment.path}
-              fill={isInSelectedSection(segment) ? segment.color : '#f8fafc'}
-              stroke="#e2e8f0"
-              strokeWidth="1"
-              className="cursor-pointer transition-all duration-300 hover:opacity-90 hover:stroke-2"
-              onClick={() => handleSegmentClick(segment.emotion)}
-            />
+            <g key={`outer-${index}`}>
+              <path
+                d={segment.path}
+                fill={isSelected(segment.emotion) ? segment.color : '#f8fafc'}
+                stroke="#e2e8f0"
+                strokeWidth="1"
+                className="cursor-pointer transition-all duration-300 hover:opacity-90 hover:stroke-2"
+                onClick={() => handleSegmentClick(segment.emotion)}
+              />
+              {/* Outer ring labels */}
+              <text
+                x={getLabelPosition(segment.startAngle, segment.endAngle, segment.innerRadius + (segment.outerRadius - segment.innerRadius) / 2).x}
+                y={getLabelPosition(segment.startAngle, segment.endAngle, segment.innerRadius + (segment.outerRadius - segment.innerRadius) / 2).y}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                className="pointer-events-none transition-all duration-300"
+                fill={isSelected(segment.emotion) ? "#ffffff" : "#64748b"}
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 'medium',
+                  opacity: 0.9
+                }}
+              >
+                {segment.emotion}
+              </text>
+            </g>
           ))}
           
           {/* Middle ring segments */}
           {middleSegments.map((segment, index) => (
-            <path
-              key={`middle-${index}`}
-              d={segment.path}
-              fill={isInSelectedSection(segment) ? segment.color : '#f1f5f9'}
-              stroke="#e2e8f0"
-              strokeWidth="1"
-              className="cursor-pointer transition-all duration-300 hover:opacity-90 hover:stroke-2"
-              onClick={() => handleSegmentClick(segment.emotion)}
-            />
+            <g key={`middle-${index}`}>
+              <path
+                d={segment.path}
+                fill={isInSelectedSection(segment) ? segment.color : '#f1f5f9'}
+                stroke="#e2e8f0"
+                strokeWidth="1"
+                className="cursor-pointer transition-all duration-500 hover:opacity-90 hover:stroke-2"
+                onClick={() => handleSegmentClick(segment.emotion)}
+                onMouseEnter={() => {
+                  setHoveredRing('middle');
+                  setHoveredSection(segment.emotion);
+                }}
+                onMouseLeave={() => {
+                  setHoveredRing(null);
+                  setHoveredSection(null);
+                }}
+              />
+              {/* Middle ring labels */}
+              <text
+                x={getLabelPosition(segment.startAngle, segment.endAngle, segment.isExpanded ? 210 : 150).x}
+                y={getLabelPosition(segment.startAngle, segment.endAngle, segment.isExpanded ? 210 : 150).y}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                className="pointer-events-none transition-all duration-500"
+                fill={isInSelectedSection(segment) ? "#ffffff" : "#64748b"}
+                style={{
+                  fontSize: segment.isExpanded ? '18px' : '12px',
+                  fontWeight: segment.isExpanded ? 'bold' : 'semibold',
+                  opacity: segment.isExpanded ? 1 : 0.9
+                }}
+              >
+                {segment.emotion}
+              </text>
+            </g>
           ))}
           
           {/* Core segments */}
           {coreSegments.map((segment, index) => (
-            <path
-              key={`core-${index}`}
-              d={segment.path}
-              fill={isInSelectedSection(segment) ? segment.color : '#ffffff'}
-              stroke="#e2e8f0"
-              strokeWidth="2"
-              className="cursor-pointer transition-all duration-300 hover:opacity-90 hover:stroke-3"
-              onClick={() => handleSegmentClick(segment.emotion)}
-            />
+            <g key={`core-${index}`}>
+              <path
+                d={segment.path}
+                fill={isInSelectedSection(segment) ? segment.color : '#ffffff'}
+                stroke="#e2e8f0"
+                strokeWidth="2"
+                className="cursor-pointer transition-all duration-500 hover:opacity-90 hover:stroke-3"
+                onClick={() => handleSegmentClick(segment.emotion)}
+                onMouseEnter={() => {
+                  setHoveredRing('core');
+                  setHoveredSection(segment.emotion);
+                }}
+                onMouseLeave={() => {
+                  setHoveredRing(null);
+                  setHoveredSection(null);
+                }}
+              />
+              {/* Core emotion labels */}
+              <text
+                x={getLabelPosition(segment.startAngle, segment.endAngle, segment.isExpanded ? 80 : 50).x}
+                y={getLabelPosition(segment.startAngle, segment.endAngle, segment.isExpanded ? 80 : 50).y}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                className="pointer-events-none transition-all duration-500"
+                fill={isInSelectedSection(segment) ? "#ffffff" : "#475569"}
+                style={{
+                  fontSize: segment.isExpanded ? '20px' : '12px',
+                  fontWeight: 'bold',
+                  opacity: segment.isExpanded ? 1 : 1
+                }}
+              >
+                {segment.emotion}
+              </text>
+            </g>
           ))}
           
           {/* Center circle */}
           <circle
             cx={center}
             cy={center}
-            r="20"
+            r="30"
             fill="#ffffff"
             stroke="#e2e8f0"
             strokeWidth="2"
             className="cursor-pointer hover:stroke-3 transition-all duration-300"
             onClick={() => handleSegmentClick('')}
           />
-          
-          {/* Emotion labels */}
-          {coreSegments.map((segment, index) => {
-            const angle = (index * (2 * Math.PI) / wheelData.length) + ((2 * Math.PI) / wheelData.length / 2);
-            const radius = 40;
-            const x = center + radius * Math.cos(angle);
-            const y = center + radius * Math.sin(angle);
-            
-            return (
-              <text
-                key={`core-label-${index}`}
-                x={x}
-                y={y}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                className="text-xs font-bold pointer-events-none"
-                fill={isInSelectedSection(segment) ? "#ffffff" : "#475569"}
-              >
-                {segment.emotion}
-              </text>
-            );
-          })}
         </svg>
         
         {/* Selected emotion display */}
-        {selectedEmotion && (
+        {selectedEmotion && !hoveredRing && (
           <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 bg-white px-6 py-3 rounded-xl shadow-lg border border-gray-200">
             <span className="text-sm font-semibold text-gray-700">
               Selected: <span className="text-blue-600">{selectedEmotion}</span>
@@ -382,7 +453,7 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
       </div>
       
       <div className="mt-8 text-sm text-gray-500 text-center max-w-md">
-        Click any emotion to select and focus that section. The wheel will highlight related emotions.
+        Hover over any ring to expand and see all emotions clearly. Click to select.
       </div>
     </div>
   );

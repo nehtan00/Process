@@ -18,9 +18,9 @@ function App() {
         )}
       </header>
       
-      <div className="flex flex-col xl:flex-row gap-8 p-6 max-w-7xl mx-auto">
+      <div className="flex flex-col 2xl:flex-row gap-8 p-6 max-w-9xl mx-auto">
         {/* Feelings Wheel - Always visible */}
-        <div className="xl:w-1/3 flex justify-center">
+        <div className="2xl:w-4/5 flex justify-center">
           <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20">
             <FeelingsWheel 
               selectedEmotion={selectedEmotion}
@@ -30,7 +30,7 @@ function App() {
         </div>
         
         {/* Worksheets */}
-        <div className="xl:w-2/3">
+        <div className="2xl:w-1/5">
           <WorksheetStepper selectedEmotion={selectedEmotion} />
         </div>
       </div>
