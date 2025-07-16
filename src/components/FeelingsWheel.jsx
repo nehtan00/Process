@@ -184,7 +184,7 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
     const segments = [];
     const isExpanded = hoveredRing === 'middle';
     const innerRadius = isExpanded ? 140 : 100;
-    const outerRadius = isExpanded ? 280 : 200;
+    const outerRadius = isExpanded ? 260 : 180;
     
     wheelData.forEach((core, coreIndex) => {
       const coreSegmentAngle = (2 * Math.PI) / wheelData.length;
@@ -224,8 +224,7 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
           endAngle,
           innerRadius,
           outerRadius,
-          isExpanded,
-          outerEmotions: middle.outer
+          isExpanded
         });
       });
     });
@@ -233,54 +232,64 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
   }, [center, hoveredRing]);
 
   const outerSegments = useMemo(() => {
-    if (hoveredRing !== 'middle' || !hoveredSection) return [];
-    
     const segments = [];
-    const innerRadius = 300;
-    const outerRadius = 420;
+    const isExpanded = hoveredRing === 'middle' && hoveredSection;
+    const innerRadius = isExpanded ? 280 : 200;
+    const outerRadius = isExpanded ? 380 : 260;
     
-    const activeMiddle = middleSegments.find(s => s.emotion === hoveredSection);
-    if (!activeMiddle) return [];
-    
-    const segmentAngle = (activeMiddle.endAngle - activeMiddle.startAngle) / activeMiddle.outerEmotions.length;
-    
-    activeMiddle.outerEmotions.forEach((outer, index) => {
-      const startAngle = activeMiddle.startAngle + (index * segmentAngle);
-      const endAngle = activeMiddle.startAngle + ((index + 1) * segmentAngle);
+    wheelData.forEach((core, coreIndex) => {
+      const coreSegmentAngle = (2 * Math.PI) / wheelData.length;
+      const coreStartAngle = coreIndex * coreSegmentAngle;
+      const middleSegmentAngle = coreSegmentAngle / core.middle.length;
       
-      const x1 = center + innerRadius * Math.cos(startAngle);
-      const y1 = center + innerRadius * Math.sin(startAngle);
-      const x2 = center + innerRadius * Math.cos(endAngle);
-      const y2 = center + innerRadius * Math.sin(endAngle);
-      const x3 = center + outerRadius * Math.cos(endAngle);
-      const y3 = center + outerRadius * Math.sin(endAngle);
-      const x4 = center + outerRadius * Math.cos(startAngle);
-      const y4 = center + outerRadius * Math.sin(startAngle);
-      
-      const largeArcFlag = segmentAngle > Math.PI ? 1 : 0;
-      
-      const path = [
-        `M ${x1} ${y1}`,
-        `A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
-        `L ${x3} ${y3}`,
-        `A ${outerRadius} ${outerRadius} 0 ${largeArcFlag} 0 ${x4} ${y4}`,
-        'Z'
-      ].join(' ');
-      
-      segments.push({
-        path,
-        emotion: outer,
-        color: activeMiddle.color,
-        startAngle,
-        endAngle,
-        innerRadius,
-        outerRadius,
-        index
+      core.middle.forEach((middle, middleIndex) => {
+        const startAngle = coreStartAngle + (middleIndex * middleSegmentAngle);
+        const endAngle = coreStartAngle + ((middleIndex + 1) * middleSegmentAngle);
+        const segmentAngle = middleSegmentAngle / middle.outer.length;
+        
+        middle.outer.forEach((outer, outerIndex) => {
+          const outerStartAngle = startAngle + (outerIndex * segmentAngle);
+          const outerEndAngle = startAngle + ((outerIndex + 1) * segmentAngle);
+          
+          const x1 = center + innerRadius * Math.cos(outerStartAngle);
+          const y1 = center + innerRadius * Math.sin(outerStartAngle);
+          const x2 = center + innerRadius * Math.cos(outerEndAngle);
+          const y2 = center + innerRadius * Math.sin(outerEndAngle);
+          const x3 = center + outerRadius * Math.cos(outerEndAngle);
+          const y3 = center + outerRadius * Math.sin(outerEndAngle);
+          const x4 = center + outerRadius * Math.cos(outerStartAngle);
+          const y4 = center + outerRadius * Math.sin(outerStartAngle);
+          
+          const largeArcFlag = segmentAngle > Math.PI ? 1 : 0;
+          
+          const path = [
+            `M ${x1} ${y1}`,
+            `A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+            `L ${x3} ${y3}`,
+            `A ${outerRadius} ${outerRadius} 0 ${largeArcFlag} 0 ${x4} ${y4}`,
+            'Z'
+          ].join(' ');
+          
+          segments.push({
+            path,
+            emotion: outer,
+            color: core.color,
+            coreIndex,
+            middleIndex,
+            outerIndex,
+            startAngle: outerStartAngle,
+            endAngle: outerEndAngle,
+            innerRadius,
+            outerRadius,
+            isExpanded,
+            isVisible: isExpanded || !hoveredRing
+          });
+        });
       });
     });
     
     return segments;
-  }, [center, hoveredRing, hoveredSection, middleSegments]);
+  }, [center, hoveredRing, hoveredSection]);
 
   const handleSegmentClick = (emotion) => {
     onSelectEmotion(emotion);
@@ -323,16 +332,19 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
       <div className="mb-4 text-xl font-bold text-gray-800">Feelings Wheel</div>
       <div className="relative">
         <svg width={size} height={size} className="drop-shadow-xl">
-          {/* Outer ring segments - only visible when hovering middle ring */}
+          {/* Outer ring segments - always visible but expand on hover */}
           {outerSegments.map((segment, index) => (
             <g key={`outer-${index}`}>
               <path
                 d={segment.path}
-                fill={isSelected(segment.emotion) ? segment.color : '#f8fafc'}
+                fill={isSelected(segment.emotion) ? segment.color : (segment.isExpanded ? '#f8fafc' : '#f1f5f9')}
                 stroke="#e2e8f0"
                 strokeWidth="1"
-                className="cursor-pointer transition-all duration-300 hover:opacity-90 hover:stroke-2"
+                className="cursor-pointer transition-all duration-500 hover:opacity-90 hover:stroke-2"
                 onClick={() => handleSegmentClick(segment.emotion)}
+                style={{
+                  opacity: segment.isVisible ? 1 : 0.3
+                }}
               />
               {/* Outer ring labels */}
               <text
@@ -340,12 +352,12 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
                 y={getLabelPosition(segment.startAngle, segment.endAngle, segment.innerRadius + (segment.outerRadius - segment.innerRadius) / 2).y}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                className="pointer-events-none transition-all duration-300"
+                className="pointer-events-none transition-all duration-500"
                 fill={isSelected(segment.emotion) ? "#ffffff" : "#64748b"}
                 style={{
-                  fontSize: '12px',
-                  fontWeight: 'medium',
-                  opacity: 0.9
+                  fontSize: segment.isExpanded ? '14px' : '10px',
+                  fontWeight: segment.isExpanded ? 'semibold' : 'medium',
+                  opacity: segment.isVisible ? (segment.isExpanded ? 1 : 0.7) : 0.3
                 }}
               >
                 {segment.emotion}
@@ -374,8 +386,8 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
               />
               {/* Middle ring labels */}
               <text
-                x={getLabelPosition(segment.startAngle, segment.endAngle, segment.isExpanded ? 210 : 150).x}
-                y={getLabelPosition(segment.startAngle, segment.endAngle, segment.isExpanded ? 210 : 150).y}
+                x={getLabelPosition(segment.startAngle, segment.endAngle, segment.isExpanded ? 200 : 140).x}
+                y={getLabelPosition(segment.startAngle, segment.endAngle, segment.isExpanded ? 200 : 140).y}
                 textAnchor="middle"
                 dominantBaseline="middle"
                 className="pointer-events-none transition-all duration-500"
