@@ -1,119 +1,258 @@
 import React, { useMemo, useState, useRef } from "react";
 
-// Proper Plutchik Wheel of Emotions structure
+// New data structure matching the provided wheel image
 const wheelData = [
   {
-    core: "Joy",
-    color: "#FBBF24",
+    core: "Happy",
+    color: "#FFD93B", // bright yellow
     middle: [
       {
-        label: "Serenity",
-        outer: ["Content", "Peaceful", "Relaxed", "Calm", "Tranquil"]
+        label: "Playful",
+        color: "#FFD93B",
+        outer: [
+          { label: "Aroused", color: "#FFE066" },
+          { label: "Cheeky", color: "#FFD23F" },
+          { label: "Free", color: "#FFB627" },
+          { label: "Joyful", color: "#FFB300" },
+          { label: "Curious", color: "#FFD93B" },
+          { label: "Inquisitive", color: "#F7C948" },
+          { label: "Successful", color: "#F4D35E" },
+          { label: "Confident", color: "#F7B801" },
+          { label: "Respected", color: "#F9A602" },
+          { label: "Valued", color: "#F6C700" },
+          { label: "Courageous", color: "#F7B801" },
+          { label: "Creative", color: "#F7C948" }
+        ]
       },
       {
-        label: "Ecstasy",
-        outer: ["Elated", "Euphoric", "Thrilled", "Exhilarated", "Overjoyed"]
+        label: "Content",
+        color: "#FFE066",
+        outer: [
+          { label: "Proud", color: "#FFE066" },
+          { label: "Accepted", color: "#F9F871" },
+          { label: "Powerful", color: "#F7D716" },
+          { label: "Peaceful", color: "#F7E06B" },
+          { label: "Trusting", color: "#F7E06B" },
+          { label: "Optimistic", color: "#F7E06B" }
+        ]
+      },
+      {
+        label: "Interested",
+        color: "#F7C948",
+        outer: [
+          { label: "Hopeful", color: "#F7C948" },
+          { label: "Inspired", color: "#F7B801" },
+          { label: "Loving", color: "#FFD23F" },
+          { label: "Thankful", color: "#FFD93B" },
+          { label: "Sensitive", color: "#FFE066" },
+          { label: "Intimate", color: "#F7C948" }
+        ]
       }
-    ],
+    ]
   },
   {
-    core: "Trust",
-    color: "#10B981",
+    core: "Surprised",
+    color: "#4ECDC4", // teal
     middle: [
       {
-        label: "Acceptance",
-        outer: ["Welcoming", "Open", "Receptive", "Approving", "Understanding"]
+        label: "Excited",
+        color: "#4ECDC4",
+        outer: [
+          { label: "Energetic", color: "#63E6BE" },
+          { label: "Eager", color: "#36CFC9" },
+          { label: "Astonished", color: "#38B2AC" },
+          { label: "Awe", color: "#4ECDC4" }
+        ]
       },
       {
-        label: "Admiration",
-        outer: ["Respectful", "Appreciative", "Grateful", "Honored", "Valued"]
+        label: "Amazed",
+        color: "#63E6BE",
+        outer: [
+          { label: "Shocked", color: "#63E6BE" },
+          { label: "Disillusioned", color: "#48C9B0" },
+          { label: "Perplexed", color: "#4ECDC4" }
+        ]
+      },
+      {
+        label: "Confused",
+        color: "#38B2AC",
+        outer: [
+          { label: "Startled", color: "#38B2AC" },
+          { label: "Stressed", color: "#36CFC9" },
+          { label: "Tired", color: "#4ECDC4" }
+        ]
       }
-    ],
+    ]
   },
   {
-    core: "Fear",
-    color: "#A21CAF",
+    core: "Bad",
+    color: "#9D4EDD", // purple
     middle: [
       {
-        label: "Apprehension",
-        outer: ["Uneasy", "Worried", "Concerned", "Anxious", "Nervous"]
+        label: "Bored",
+        color: "#B983FF",
+        outer: [
+          { label: "Indifferent", color: "#B983FF" },
+          { label: "Apathetic", color: "#A084E8" },
+          { label: "Busy", color: "#9D4EDD" }
+        ]
       },
       {
-        label: "Terror",
-        outer: ["Panicked", "Horrified", "Petrified", "Alarmed", "Frightened"]
+        label: "Stressed",
+        color: "#7F6EDB",
+        outer: [
+          { label: "Overwhelmed", color: "#7F6EDB" },
+          { label: "Rushed", color: "#9D4EDD" }
+        ]
+      },
+      {
+        label: "Tired",
+        color: "#A084E8",
+        outer: [
+          { label: "Sleepy", color: "#A084E8" },
+          { label: "Unfocused", color: "#B983FF" },
+          { label: "Drained", color: "#9D4EDD" }
+        ]
       }
-    ],
+    ]
   },
   {
-    core: "Surprise",
-    color: "#F59E0B",
+    core: "Fearful",
+    color: "#FF6F61", // coral
     middle: [
       {
-        label: "Distraction",
-        outer: ["Confused", "Bewildered", "Perplexed", "Puzzled", "Mystified"]
+        label: "Scared",
+        color: "#FF6F61",
+        outer: [
+          { label: "Helpless", color: "#FFB3AB" },
+          { label: "Frightened", color: "#FF6F61" },
+          { label: "Overwhelmed", color: "#FF8C82" },
+          { label: "Worried", color: "#FFB3AB" }
+        ]
       },
       {
-        label: "Amazement",
-        outer: ["Astonished", "Stunned", "Shocked", "Awed", "Wonderstruck"]
+        label: "Anxious",
+        color: "#FF8C82",
+        outer: [
+          { label: "Insecure", color: "#FF8C82" },
+          { label: "Weak", color: "#FFB3AB" },
+          { label: "Rejected", color: "#FF6F61" },
+          { label: "Threatened", color: "#FF8C82" }
+        ]
+      },
+      {
+        label: "Rejected",
+        color: "#FFB3AB",
+        outer: [
+          { label: "Insignificant", color: "#FFB3AB" },
+          { label: "Excluded", color: "#FF8C82" },
+          { label: "Persecuted", color: "#FF6F61" },
+          { label: "Nervous", color: "#FFB3AB" }
+        ]
       }
-    ],
+    ]
   },
   {
-    core: "Sadness",
-    color: "#6366F1",
+    core: "Angry",
+    color: "#D7263D", // red
     middle: [
       {
-        label: "Pensiveness",
-        outer: ["Melancholy", "Reflective", "Thoughtful", "Contemplative", "Somber"]
+        label: "Let Down",
+        color: "#F46036",
+        outer: [
+          { label: "Betrayed", color: "#F46036" },
+          { label: "Resentful", color: "#D7263D" },
+          { label: "Disrespected", color: "#F46036" }
+        ]
       },
       {
-        label: "Grief",
-        outer: ["Devastated", "Heartbroken", "Mournful", "Despairing", "Hopeless"]
+        label: "Humiliated",
+        color: "#D7263D",
+        outer: [
+          { label: "Ridiculed", color: "#D7263D" },
+          { label: "Indignant", color: "#F46036" },
+          { label: "Violated", color: "#D7263D" }
+        ]
+      },
+      {
+        label: "Bitter",
+        color: "#A71D31",
+        outer: [
+          { label: "Mad", color: "#A71D31" },
+          { label: "Aggressive", color: "#D7263D" },
+          { label: "Frustrated", color: "#F46036" },
+          { label: "Distant", color: "#A71D31" },
+          { label: "Critical", color: "#D7263D" }
+        ]
       }
-    ],
+    ]
   },
   {
-    core: "Disgust",
-    color: "#92400E",
+    core: "Disgusted",
+    color: "#A0522D", // brown
     middle: [
       {
-        label: "Boredom",
-        outer: ["Uninterested", "Apathetic", "Indifferent", "Unmotivated", "Disengaged"]
+        label: "Disapproving",
+        color: "#C97C5D",
+        outer: [
+          { label: "Disappointed", color: "#C97C5D" },
+          { label: "Appalled", color: "#A0522D" },
+          { label: "Repelled", color: "#C97C5D" }
+        ]
       },
       {
-        label: "Loathing",
-        outer: ["Revolted", "Repulsed", "Disgusted", "Appalled", "Horrified"]
+        label: "Disappointed",
+        color: "#A0522D",
+        outer: [
+          { label: "Nauseated", color: "#A0522D" },
+          { label: "Awkward", color: "#C97C5D" },
+          { label: "Embarrassed", color: "#A0522D" }
+        ]
+      },
+      {
+        label: "Repelled",
+        color: "#7C3F00",
+        outer: [
+          { label: "Horrified", color: "#7C3F00" },
+          { label: "Uncomfortable", color: "#A0522D" },
+          { label: "Judgmental", color: "#C97C5D" }
+        ]
       }
-    ],
+    ]
   },
   {
-    core: "Anger",
-    color: "#EF4444",
+    core: "Sad",
+    color: "#3A0CA3", // blue
     middle: [
       {
-        label: "Annoyance",
-        outer: ["Irritated", "Frustrated", "Exasperated", "Agitated", "Bothered"]
+        label: "Lonely",
+        color: "#5F4B8B",
+        outer: [
+          { label: "Isolated", color: "#5F4B8B" },
+          { label: "Abandoned", color: "#3A0CA3" },
+          { label: "Victimized", color: "#5F4B8B" }
+        ]
       },
       {
-        label: "Rage",
-        outer: ["Furious", "Enraged", "Livid", "Incensed", "Infuriated"]
-      }
-    ],
-  },
-  {
-    core: "Anticipation",
-    color: "#F97316",
-    middle: [
-      {
-        label: "Interest",
-        outer: ["Curious", "Engaged", "Focused", "Attentive", "Involved"]
+        label: "Vulnerable",
+        color: "#3A0CA3",
+        outer: [
+          { label: "Fragile", color: "#3A0CA3" },
+          { label: "Grief", color: "#5F4B8B" },
+          { label: "Powerless", color: "#3A0CA3" }
+        ]
       },
       {
-        label: "Vigilance",
-        outer: ["Alert", "Watchful", "Cautious", "Careful", "Mindful"]
+        label: "Despair",
+        color: "#1B1B3A",
+        outer: [
+          { label: "Guilty", color: "#1B1B3A" },
+          { label: "Empty", color: "#3A0CA3" },
+          { label: "Remorseful", color: "#5F4B8B" }
+        ]
       }
-    ],
-  },
+    ]
+  }
 ];
 
 // Helper to flatten all emotions for lookup
@@ -124,7 +263,7 @@ const allEmotions = (() => {
     core.middle.forEach((mid, j) => {
       map[mid.label.toLowerCase()] = { core: core.core, coreIdx: i, middle: mid.label, middleIdx: j };
       mid.outer.forEach((outer, k) => {
-        map[outer.toLowerCase()] = { core: core.core, coreIdx: i, middle: mid.label, middleIdx: j, outer, outerIdx: k };
+        map[outer.label.toLowerCase()] = { core: core.core, coreIdx: i, middle: mid.label, middleIdx: j, outer: outer.label, outerIdx: k };
       });
     });
   });
@@ -233,7 +372,7 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
         segments.push({
           path,
           emotion: middle.label,
-          color: core.color,
+          color: middle.color,
           coreIndex,
           middleIndex,
           startAngle,
@@ -287,12 +426,15 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
           const arcEndX = center + arcRadius * Math.cos(outerEndAngle);
           const arcEndY = center + arcRadius * Math.sin(outerEndAngle);
           const arcPath = `M ${arcStartX} ${arcStartY} A ${arcRadius} ${arcRadius} 0 ${largeArcFlag} 1 ${arcEndX} ${arcEndY}`;
+          // Use the new color property for each outer segment
+          const outerColor = typeof outer === 'object' && outer.color ? outer.color : middle.color;
+          const outerLabel = typeof outer === 'object' && outer.label ? outer.label : outer;
           segments.push({
             path,
             arcPath,
             arcId: `arc-path-${coreIndex}-${middleIndex}-${outerIndex}`,
-            emotion: outer,
-            color: core.color,
+            emotion: outerLabel,
+            color: outerColor,
             coreIndex,
             middleIndex,
             outerIndex,
@@ -375,7 +517,7 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
                 style={{ opacity: segment.isVisible ? 1 : 0.3 }}>
                 <path
                   d={segment.path}
-                  fill={isSelected(segment.emotion) ? segment.color : (segment.isExpanded ? '#f8fafc' : '#f1f5f9')}
+                  fill={segment.color}
                   stroke="#e2e8f0"
                   strokeWidth={isHovered ? 3 : 1}
                   className="cursor-pointer"
