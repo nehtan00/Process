@@ -489,14 +489,19 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
 
   return (
     <div ref={containerRef} className="flex flex-col items-center w-full h-full min-h-[500px]">
+      {/* Skip link for accessibility */}
+      <a href="#after-wheel" className="sr-only focus:not-sr-only absolute left-2 top-2 bg-white text-blue-700 px-3 py-2 rounded z-50">Skip Feelings Wheel</a>
       <div className="mb-4 text-xl font-bold text-gray-800">Feelings Wheel</div>
       <div className="relative w-full h-full flex items-center justify-center" style={{minHeight: 500}}>
         <svg
           ref={svgRef}
-          width={size}
-          height={size}
+          width="100%"
+          height="100%"
           viewBox={`0 0 ${size} ${size}`}
-          className="drop-shadow-xl w-full h-auto"
+          className="drop-shadow-xl w-full h-auto max-w-full max-h-full"
+          role="region"
+          aria-label="Feelings Wheel: select an emotion"
+          tabIndex={0}
         >
           {/* Outer ring segments - always visible but expand on hover */}
           {outerSegments.map((segment, index) => {
@@ -512,9 +517,19 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
             const isHovered = hoveredOuter === index;
             return (
               <g key={`outer-${index}`}
+                tabIndex={0}
+                aria-label={segment.emotion}
+                role="button"
+                aria-selected={isSelected(segment.emotion)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') handleSegmentClick(segment.emotion);
+                }}
+                onFocus={() => setHoveredOuter(index)}
+                onBlur={() => setHoveredOuter(null)}
                 onMouseEnter={() => setHoveredOuter(index)}
                 onMouseLeave={() => setHoveredOuter(null)}
-                style={{ opacity: segment.isVisible ? 1 : 0.3 }}>
+                style={{ opacity: segment.isVisible ? 1 : 0.3, outline: isSelected(segment.emotion) ? '2px solid #2563eb' : undefined, outlineOffset: 2 }}
+              >
                 <path
                   d={segment.path}
                   fill={segment.color}
@@ -592,80 +607,240 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
           })}
           
           {/* Middle ring segments */}
-          {middleSegments.map((segment, index) => (
-            <g key={`middle-${index}`}>
-              <path
-                d={segment.path}
-                fill={isInSelectedSection(segment) ? segment.color : '#f1f5f9'}
-                stroke="#e2e8f0"
-                strokeWidth="1"
-                className="cursor-pointer transition-all duration-500 hover:opacity-90 hover:stroke-2"
-                onClick={() => handleSegmentClick(segment.emotion)}
-                onMouseEnter={() => {
+          {middleSegments.map((segment, index) => {
+            // Arc path for textPath
+            const arcRadius = (segment.innerRadius + segment.outerRadius) / 2;
+            const arcStartX = center + arcRadius * Math.cos(segment.startAngle);
+            const arcStartY = center + arcRadius * Math.sin(segment.startAngle);
+            const arcEndX = center + arcRadius * Math.cos(segment.endAngle);
+            const arcEndY = center + arcRadius * Math.sin(segment.endAngle);
+            const largeArcFlag = (segment.endAngle - segment.startAngle) > Math.PI ? 1 : 0;
+            const arcPath = `M ${arcStartX} ${arcStartY} A ${arcRadius} ${arcRadius} 0 ${largeArcFlag} 1 ${arcEndX} ${arcEndY}`;
+            const arcId = `middle-arc-${index}`;
+            // Dynamic font size
+            const arcLength = arcRadius * (segment.endAngle - segment.startAngle);
+            const baseFont = segment.isExpanded ? size * 0.035 : size * 0.022;
+            const fontSize = Math.min(baseFont, Math.floor(arcLength / (segment.emotion.length * 0.7)));
+            return (
+              <g key={`middle-${index}`}
+                tabIndex={0}
+                aria-label={segment.emotion}
+                role="button"
+                aria-selected={isSelected(segment.emotion)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') handleSegmentClick(segment.emotion);
+                }}
+                onFocus={() => {
                   setHoveredRing('middle');
                   setHoveredSection(segment.emotion);
                 }}
-                onMouseLeave={() => {
+                onBlur={() => {
                   setHoveredRing(null);
                   setHoveredSection(null);
                 }}
-              />
-              {/* Middle ring labels */}
-              <text
-                x={getLabelPosition(segment.startAngle, segment.endAngle, segment.isExpanded ? 200 : 140).x}
-                y={getLabelPosition(segment.startAngle, segment.endAngle, segment.isExpanded ? 200 : 140).y}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                className="pointer-events-none transition-all duration-500"
-                fill={isInSelectedSection(segment) ? "#ffffff" : "#64748b"}
-                style={{
-                  fontSize: segment.isExpanded ? '18px' : '12px',
-                  fontWeight: segment.isExpanded ? 'bold' : 'semibold',
-                  opacity: segment.isExpanded ? 1 : 0.9
-                }}
+                style={{ outline: isSelected(segment.emotion) ? '2px solid #2563eb' : undefined, outlineOffset: 2 }}
               >
-                {segment.emotion}
-              </text>
-            </g>
-          ))}
+                <path
+                  d={segment.path}
+                  fill={isInSelectedSection(segment) ? segment.color : '#f1f5f9'}
+                  stroke="#e2e8f0"
+                  strokeWidth={isInSelectedSection(segment) ? 3 : 1}
+                  className="cursor-pointer"
+                  style={{
+                    filter: isInSelectedSection(segment) ? 'drop-shadow(0 0 12px #888)' : undefined,
+                    transform: hoveredSection === segment.emotion ? 'scale(1.06)' : 'scale(1)',
+                    transition: 'transform 0.35s cubic-bezier(.4,2,.6,1), filter 0.35s cubic-bezier(.4,2,.6,1)',
+                  }}
+                  onClick={() => handleSegmentClick(segment.emotion)}
+                  onMouseEnter={() => {
+                    setHoveredRing('middle');
+                    setHoveredSection(segment.emotion);
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredRing(null);
+                    setHoveredSection(null);
+                  }}
+                />
+                <defs>
+                  <path id={arcId} d={arcPath} />
+                </defs>
+                <text
+                  fontSize={fontSize}
+                  fontWeight={segment.isExpanded ? 'bold' : 'semibold'}
+                  fill={isInSelectedSection(segment) ? '#ffffff' : '#64748b'}
+                  style={{
+                    letterSpacing: 1,
+                    opacity: segment.isExpanded ? 1 : 0.9,
+                    transition: 'font-size 0.35s cubic-bezier(.4,2,.6,1), opacity 0.35s cubic-bezier(.4,2,.6,1)',
+                  }}
+                >
+                  <textPath
+                    xlinkHref={`#${arcId}`}
+                    startOffset="50%"
+                    textAnchor="middle"
+                    alignmentBaseline="middle"
+                    dominantBaseline="middle"
+                    style={{
+                      textTransform: 'capitalize',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                      transition: 'all 0.35s cubic-bezier(.4,2,.6,1)',
+                    }}
+                  >
+                    {segment.emotion}
+                  </textPath>
+                </text>
+                {/* Popout for long words */}
+                {segment.emotion.length > 10 && hoveredSection === segment.emotion && (
+                  <foreignObject
+                    x={center - size * 0.18}
+                    y={center - segment.outerRadius - size * 0.09}
+                    width={size * 0.36}
+                    height={size * 0.09}
+                    style={{ pointerEvents: 'none', transition: 'all 0.35s cubic-bezier(.4,2,.6,1)' }}
+                  >
+                    <div style={{
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: size * 0.045,
+                      fontWeight: 700,
+                      color: '#222',
+                      background: 'rgba(255,255,255,0.97)',
+                      borderRadius: 12,
+                      boxShadow: '0 4px 24px 0 #0002',
+                      textAlign: 'center',
+                      pointerEvents: 'none',
+                      opacity: 1,
+                      transition: 'all 0.35s cubic-bezier(.4,2,.6,1)',
+                    }}>
+                      {segment.emotion}
+                    </div>
+                  </foreignObject>
+                )}
+              </g>
+            );
+          })}
           
           {/* Core segments */}
-          {coreSegments.map((segment, index) => (
-            <g key={`core-${index}`}>
-              <path
-                d={segment.path}
-                fill={isInSelectedSection(segment) ? segment.color : '#ffffff'}
-                stroke="#e2e8f0"
-                strokeWidth="2"
-                className="cursor-pointer transition-all duration-500 hover:opacity-90 hover:stroke-3"
-                onClick={() => handleSegmentClick(segment.emotion)}
-                onMouseEnter={() => {
+          {coreSegments.map((segment, index) => {
+            // Arc path for textPath
+            const arcRadius = segment.isExpanded ? 80 : 50;
+            const arcStartX = center + arcRadius * Math.cos(segment.startAngle);
+            const arcStartY = center + arcRadius * Math.sin(segment.startAngle);
+            const arcEndX = center + arcRadius * Math.cos(segment.endAngle);
+            const arcEndY = center + arcRadius * Math.sin(segment.endAngle);
+            const largeArcFlag = (segment.endAngle - segment.startAngle) > Math.PI ? 1 : 0;
+            const arcPath = `M ${arcStartX} ${arcStartY} A ${arcRadius} ${arcRadius} 0 ${largeArcFlag} 1 ${arcEndX} ${arcEndY}`;
+            const arcId = `core-arc-${index}`;
+            // Dynamic font size
+            const arcLength = arcRadius * (segment.endAngle - segment.startAngle);
+            const baseFont = segment.isExpanded ? size * 0.045 : size * 0.028;
+            const fontSize = Math.min(baseFont, Math.floor(arcLength / (segment.emotion.length * 0.7)));
+            return (
+              <g key={`core-${index}`}
+                tabIndex={0}
+                aria-label={segment.emotion}
+                role="button"
+                aria-selected={isSelected(segment.emotion)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') handleSegmentClick(segment.emotion);
+                }}
+                onFocus={() => {
                   setHoveredRing('core');
                   setHoveredSection(segment.emotion);
                 }}
-                onMouseLeave={() => {
+                onBlur={() => {
                   setHoveredRing(null);
                   setHoveredSection(null);
                 }}
-              />
-              {/* Core emotion labels */}
-              <text
-                x={getLabelPosition(segment.startAngle, segment.endAngle, segment.isExpanded ? 80 : 50).x}
-                y={getLabelPosition(segment.startAngle, segment.endAngle, segment.isExpanded ? 80 : 50).y}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                className="pointer-events-none transition-all duration-500"
-                fill={isInSelectedSection(segment) ? "#ffffff" : "#475569"}
-                style={{
-                  fontSize: segment.isExpanded ? '20px' : '12px',
-                  fontWeight: 'bold',
-                  opacity: segment.isExpanded ? 1 : 1
-                }}
+                style={{ outline: isSelected(segment.emotion) ? '2px solid #2563eb' : undefined, outlineOffset: 2 }}
               >
-                {segment.emotion}
-              </text>
-            </g>
-          ))}
+                <path
+                  d={segment.path}
+                  fill={isInSelectedSection(segment) ? segment.color : '#ffffff'}
+                  stroke="#e2e8f0"
+                  strokeWidth={isInSelectedSection(segment) ? 3 : 2}
+                  className="cursor-pointer"
+                  style={{
+                    filter: isInSelectedSection(segment) ? 'drop-shadow(0 0 12px #888)' : undefined,
+                    transform: hoveredSection === segment.emotion ? 'scale(1.06)' : 'scale(1)',
+                    transition: 'transform 0.35s cubic-bezier(.4,2,.6,1), filter 0.35s cubic-bezier(.4,2,.6,1)',
+                  }}
+                  onClick={() => handleSegmentClick(segment.emotion)}
+                  onMouseEnter={() => {
+                    setHoveredRing('core');
+                    setHoveredSection(segment.emotion);
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredRing(null);
+                    setHoveredSection(null);
+                  }}
+                />
+                <defs>
+                  <path id={arcId} d={arcPath} />
+                </defs>
+                <text
+                  fontSize={fontSize}
+                  fontWeight="bold"
+                  fill={isInSelectedSection(segment) ? '#ffffff' : '#475569'}
+                  style={{
+                    letterSpacing: 1,
+                    opacity: 1,
+                    transition: 'font-size 0.35s cubic-bezier(.4,2,.6,1), opacity 0.35s cubic-bezier(.4,2,.6,1)',
+                  }}
+                >
+                  <textPath
+                    xlinkHref={`#${arcId}`}
+                    startOffset="50%"
+                    textAnchor="middle"
+                    alignmentBaseline="middle"
+                    dominantBaseline="middle"
+                    style={{
+                      textTransform: 'capitalize',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                      transition: 'all 0.35s cubic-bezier(.4,2,.6,1)',
+                    }}
+                  >
+                    {segment.emotion}
+                  </textPath>
+                </text>
+                {/* Popout for long words */}
+                {segment.emotion.length > 10 && hoveredSection === segment.emotion && (
+                  <foreignObject
+                    x={center - size * 0.18}
+                    y={center - segment.radius - size * 0.09}
+                    width={size * 0.36}
+                    height={size * 0.09}
+                    style={{ pointerEvents: 'none', transition: 'all 0.35s cubic-bezier(.4,2,.6,1)' }}
+                  >
+                    <div style={{
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: size * 0.045,
+                      fontWeight: 700,
+                      color: '#222',
+                      background: 'rgba(255,255,255,0.97)',
+                      borderRadius: 12,
+                      boxShadow: '0 4px 24px 0 #0002',
+                      textAlign: 'center',
+                      pointerEvents: 'none',
+                      opacity: 1,
+                      transition: 'all 0.35s cubic-bezier(.4,2,.6,1)',
+                    }}>
+                      {segment.emotion}
+                    </div>
+                  </foreignObject>
+                )}
+              </g>
+            );
+          })}
           
           {/* Center circle */}
           <circle
@@ -677,20 +852,25 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
             strokeWidth="2"
             className="cursor-pointer hover:stroke-3 transition-all duration-300"
             onClick={() => handleSegmentClick('')}
+            tabIndex={0}
+            aria-label="Clear selection"
+            role="button"
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === ' ') handleSegmentClick('');
+            }}
+            style={{ outline: selectedEmotion === '' ? '2px solid #2563eb' : undefined, outlineOffset: 2 }}
           />
         </svg>
-        
-        {/* Selected emotion display */}
-        {selectedEmotion && !hoveredRing && (
-          <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 bg-white px-6 py-3 rounded-xl shadow-lg border border-gray-200">
-            <span className="text-sm font-semibold text-gray-700">
+        {/* Selected emotion display, aria-live for screen readers */}
+        <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 bg-white px-6 py-3 rounded-xl shadow-lg border border-gray-200">
+          <span className="text-sm font-semibold text-gray-700" aria-live="polite" aria-atomic="true">
+            {selectedEmotion ? (<>
               Selected: <span className="text-blue-600">{selectedEmotion}</span>
-            </span>
-          </div>
-        )}
+            </>) : 'No emotion selected'}
+          </span>
+        </div>
       </div>
-      
-      <div className="mt-8 text-sm text-gray-500 text-center max-w-md">
+      <div id="after-wheel" className="mt-8 text-sm text-gray-500 text-center max-w-md">
         Hover over any ring to expand and see all emotions clearly. Click to select.
       </div>
     </div>
