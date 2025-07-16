@@ -511,10 +511,13 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
               return r * (segment.endAngle - segment.startAngle);
             })() : 100;
             // Dynamic font size
-            const baseFont = segment.isExpanded || hoveredOuter === index ? size * 0.025 : size * 0.017;
-            const fontSize = Math.min(baseFont, Math.floor(arcLength / (segment.emotion.length * 0.6)));
-            // On hover, rotate upright and pop out
             const isHovered = hoveredOuter === index;
+            const isSelectedSeg = isSelected(segment.emotion);
+            const scaleUp = isHovered || isSelectedSeg;
+            const baseFont = size * 0.017;
+            const maxFont = size * 0.035;
+            const fontSize = scaleUp ? Math.min(maxFont, Math.floor(arcLength / (segment.emotion.length * 0.6))) : Math.min(baseFont, Math.floor(arcLength / (segment.emotion.length * 0.7)));
+            // On hover, rotate upright and pop out
             return (
               <g key={`outer-${index}`}
                 tabIndex={0}
@@ -548,8 +551,8 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
                 </defs>
                 <text
                   fontSize={fontSize}
-                  fontWeight={isHovered ? 'bold' : 'semibold'}
-                  fill={isSelected(segment.emotion) ? "#ffffff" : "#64748b"}
+                  fontWeight={scaleUp ? 'bold' : 'semibold'}
+                  fill={isSelectedSeg ? "#ffffff" : "#64748b"}
                   style={{
                     letterSpacing: 1,
                     opacity: segment.isVisible ? (segment.isExpanded || isHovered ? 1 : 0.7) : 0.3,
@@ -572,8 +575,8 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
                     {segment.emotion}
                   </textPath>
                 </text>
-                {/* Popout on hover */}
-                {isHovered && (
+                {/* Popout on hover for long words */}
+                {segment.emotion.length > 10 && isHovered && (
                   <foreignObject
                     x={center - size * 0.18}
                     y={center - segment.outerRadius - size * 0.09}
@@ -587,7 +590,7 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: size * 0.045,
+                      fontSize: size * 0.06,
                       fontWeight: 700,
                       color: '#222',
                       background: 'rgba(255,255,255,0.97)',
@@ -619,8 +622,12 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
             const arcId = `middle-arc-${index}`;
             // Dynamic font size
             const arcLength = arcRadius * (segment.endAngle - segment.startAngle);
-            const baseFont = segment.isExpanded ? size * 0.035 : size * 0.022;
-            const fontSize = Math.min(baseFont, Math.floor(arcLength / (segment.emotion.length * 0.7)));
+            const isHovered = hoveredSection === segment.emotion;
+            const isSelectedSeg = isSelected(segment.emotion);
+            const scaleUp = isHovered || isSelectedSeg;
+            const baseFont = size * 0.022;
+            const maxFont = size * 0.045;
+            const fontSize = scaleUp ? Math.min(maxFont, Math.floor(arcLength / (segment.emotion.length * 0.7))) : Math.min(baseFont, Math.floor(arcLength / (segment.emotion.length * 0.8)));
             return (
               <g key={`middle-${index}`}
                 tabIndex={0}
@@ -666,8 +673,8 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
                 </defs>
                 <text
                   fontSize={fontSize}
-                  fontWeight={segment.isExpanded ? 'bold' : 'semibold'}
-                  fill={isInSelectedSection(segment) ? '#ffffff' : '#64748b'}
+                  fontWeight={scaleUp ? 'bold' : 'semibold'}
+                  fill={isSelectedSeg ? '#ffffff' : '#64748b'}
                   style={{
                     letterSpacing: 1,
                     opacity: segment.isExpanded ? 1 : 0.9,
@@ -691,7 +698,7 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
                   </textPath>
                 </text>
                 {/* Popout for long words */}
-                {segment.emotion.length > 10 && hoveredSection === segment.emotion && (
+                {segment.emotion.length > 10 && isHovered && (
                   <foreignObject
                     x={center - size * 0.18}
                     y={center - segment.outerRadius - size * 0.09}
@@ -705,7 +712,7 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: size * 0.045,
+                      fontSize: size * 0.06,
                       fontWeight: 700,
                       color: '#222',
                       background: 'rgba(255,255,255,0.97)',
@@ -737,8 +744,12 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
             const arcId = `core-arc-${index}`;
             // Dynamic font size
             const arcLength = arcRadius * (segment.endAngle - segment.startAngle);
-            const baseFont = segment.isExpanded ? size * 0.045 : size * 0.028;
-            const fontSize = Math.min(baseFont, Math.floor(arcLength / (segment.emotion.length * 0.7)));
+            const isHovered = hoveredSection === segment.emotion;
+            const isSelectedSeg = isSelected(segment.emotion);
+            const scaleUp = isHovered || isSelectedSeg;
+            const baseFont = size * 0.028;
+            const maxFont = size * 0.06;
+            const fontSize = scaleUp ? Math.min(maxFont, Math.floor(arcLength / (segment.emotion.length * 0.7))) : Math.min(baseFont, Math.floor(arcLength / (segment.emotion.length * 0.8)));
             return (
               <g key={`core-${index}`}
                 tabIndex={0}
@@ -785,7 +796,7 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
                 <text
                   fontSize={fontSize}
                   fontWeight="bold"
-                  fill={isInSelectedSection(segment) ? '#ffffff' : '#475569'}
+                  fill={isSelectedSeg ? '#ffffff' : '#475569'}
                   style={{
                     letterSpacing: 1,
                     opacity: 1,
@@ -809,7 +820,7 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
                   </textPath>
                 </text>
                 {/* Popout for long words */}
-                {segment.emotion.length > 10 && hoveredSection === segment.emotion && (
+                {segment.emotion.length > 10 && isHovered && (
                   <foreignObject
                     x={center - size * 0.18}
                     y={center - segment.radius - size * 0.09}
@@ -823,7 +834,7 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: size * 0.045,
+                      fontSize: size * 0.06,
                       fontWeight: 700,
                       color: '#222',
                       background: 'rgba(255,255,255,0.97)',

@@ -17,21 +17,20 @@ function App() {
           </div>
         )}
       </header>
-      
-      <div className="flex flex-col 2xl:flex-row gap-8 p-6 max-w-9xl mx-auto">
-        {/* Feelings Wheel - Always visible */}
-        <div className="2xl:w-4/5 flex justify-center">
-          <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20">
+      {/* Move Feelings Wheel above worksheet, maximize space */}
+      <div className="flex flex-col items-center gap-8 p-6 max-w-7xl mx-auto">
+        <div className="w-full flex justify-center">
+          <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20 w-full max-w-4xl flex justify-center">
             <FeelingsWheel 
               selectedEmotion={selectedEmotion}
               onSelectEmotion={setSelectedEmotion}
             />
           </div>
         </div>
-        
-        {/* Worksheets */}
-        <div className="2xl:w-1/5">
-          <WorksheetStepper selectedEmotion={selectedEmotion} />
+        <div className="w-full flex justify-center">
+          <div className="w-full max-w-2xl">
+            <WorksheetStepper selectedEmotion={selectedEmotion} />
+          </div>
         </div>
       </div>
     </div>
