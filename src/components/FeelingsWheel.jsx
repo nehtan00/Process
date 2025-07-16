@@ -135,10 +135,24 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
   const [hoveredRing, setHoveredRing] = useState(null);
   const [hoveredSection, setHoveredSection] = useState(null);
   const [hoveredOuter, setHoveredOuter] = useState(null);
-  const size = 900;
+  const containerRef = useRef();
+  const [size, setSize] = useState(600); // Default, will update on mount
   const center = size / 2;
   const svgRef = useRef();
   
+  // Responsive resize effect
+  React.useEffect(() => {
+    function handleResize() {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        setSize(Math.min(rect.width, rect.height));
+      }
+    }
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Find which segment is selected
   const selected = useMemo(() => {
     if (!selectedEmotion) return null;
@@ -236,8 +250,9 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
   const outerSegments = useMemo(() => {
     const segments = [];
     const isExpanded = hoveredRing === 'middle' && hoveredSection;
-    const innerRadius = isExpanded ? 280 : 200;
-    const outerRadius = isExpanded ? 380 : 260;
+    // Use more of the available space
+    const innerRadius = isExpanded ? size * 0.47 : size * 0.36;
+    const outerRadius = isExpanded ? size * 0.5 : size * 0.42;
     let pathId = 0;
     wheelData.forEach((core, coreIndex) => {
       const coreSegmentAngle = (2 * Math.PI) / wheelData.length;
@@ -292,7 +307,7 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
       });
     });
     return segments;
-  }, [center, hoveredRing, hoveredSection]);
+  }, [center, hoveredRing, hoveredSection, size]);
 
   const handleSegmentClick = (emotion) => {
     onSelectEmotion(emotion);
@@ -331,10 +346,16 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
   };
 
   return (
-    <div className="flex flex-col items-center">
+    <div ref={containerRef} className="flex flex-col items-center w-full h-full min-h-[500px]">
       <div className="mb-4 text-xl font-bold text-gray-800">Feelings Wheel</div>
-      <div className="relative">
-        <svg ref={svgRef} width={size} height={size} className="drop-shadow-xl">
+      <div className="relative w-full h-full flex items-center justify-center" style={{minHeight: 500}}>
+        <svg
+          ref={svgRef}
+          width={size}
+          height={size}
+          viewBox={`0 0 ${size} ${size}`}
+          className="drop-shadow-xl w-full h-auto"
+        >
           {/* Outer ring segments - always visible but expand on hover */}
           {outerSegments.map((segment, index) => {
             // Calculate arc length for dynamic font size
@@ -343,7 +364,7 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
               return r * (segment.endAngle - segment.startAngle);
             })() : 100;
             // Dynamic font size
-            const baseFont = segment.isExpanded || hoveredOuter === index ? 18 : 12;
+            const baseFont = segment.isExpanded || hoveredOuter === index ? size * 0.025 : size * 0.017;
             const fontSize = Math.min(baseFont, Math.floor(arcLength / (segment.emotion.length * 0.6)));
             // On hover, rotate upright and pop out
             const isHovered = hoveredOuter === index;
@@ -357,12 +378,12 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
                   fill={isSelected(segment.emotion) ? segment.color : (segment.isExpanded ? '#f8fafc' : '#f1f5f9')}
                   stroke="#e2e8f0"
                   strokeWidth={isHovered ? 3 : 1}
-                  className="cursor-pointer transition-all duration-500 hover:opacity-90 hover:stroke-2"
+                  className="cursor-pointer"
                   onClick={() => handleSegmentClick(segment.emotion)}
                   style={{
-                    filter: isHovered ? 'drop-shadow(0 0 8px #888)' : undefined,
-                    transform: isHovered ? 'scale(1.08)' : undefined,
-                    transition: 'all 0.3s cubic-bezier(.4,2,.6,1)'
+                    filter: isHovered ? 'drop-shadow(0 0 12px #888)' : undefined,
+                    transform: isHovered ? 'scale(1.08)' : 'scale(1)',
+                    transition: 'transform 0.35s cubic-bezier(.4,2,.6,1), filter 0.35s cubic-bezier(.4,2,.6,1)',
                   }}
                 />
                 <defs>
@@ -375,7 +396,7 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
                   style={{
                     letterSpacing: 1,
                     opacity: segment.isVisible ? (segment.isExpanded || isHovered ? 1 : 0.7) : 0.3,
-                    transition: 'all 0.3s cubic-bezier(.4,2,.6,1)',
+                    transition: 'font-size 0.35s cubic-bezier(.4,2,.6,1), opacity 0.35s cubic-bezier(.4,2,.6,1)',
                   }}
                 >
                   <textPath
@@ -388,7 +409,7 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
                       textTransform: 'capitalize',
                       cursor: 'pointer',
                       userSelect: 'none',
-                      transition: 'all 0.3s cubic-bezier(.4,2,.6,1)',
+                      transition: 'all 0.35s cubic-bezier(.4,2,.6,1)',
                     }}
                   >
                     {segment.emotion}
@@ -397,11 +418,11 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
                 {/* Popout on hover */}
                 {isHovered && (
                   <foreignObject
-                    x={center - 100}
-                    y={center - segment.outerRadius - 60}
-                    width={200}
-                    height={50}
-                    style={{ pointerEvents: 'none' }}
+                    x={center - size * 0.18}
+                    y={center - segment.outerRadius - size * 0.09}
+                    width={size * 0.36}
+                    height={size * 0.09}
+                    style={{ pointerEvents: 'none', transition: 'all 0.35s cubic-bezier(.4,2,.6,1)' }}
                   >
                     <div style={{
                       width: '100%',
@@ -409,14 +430,16 @@ export default function FeelingsWheel({ selectedEmotion, onSelectEmotion }) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: 32,
+                      fontSize: size * 0.045,
                       fontWeight: 700,
                       color: '#222',
-                      background: 'rgba(255,255,255,0.95)',
+                      background: 'rgba(255,255,255,0.97)',
                       borderRadius: 12,
                       boxShadow: '0 4px 24px 0 #0002',
                       textAlign: 'center',
                       pointerEvents: 'none',
+                      opacity: 1,
+                      transition: 'all 0.35s cubic-bezier(.4,2,.6,1)',
                     }}>
                       {segment.emotion}
                     </div>
